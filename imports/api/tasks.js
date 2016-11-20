@@ -28,6 +28,23 @@ Meteor.methods({
       createdAt: new Date(),
       owner: this.userId,
       username: Meteor.users.findOne(this.userId).username,
+      children: [],
+    });
+  },
+  'tasks.add_child'(taskId, child) {
+    check(taskId, String);
+    const task = Tasks.findOne(taskId);
+
+    if(task.private && task.owner !== this.userid) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    Tasks.task.children.insert({
+      child,
+      createdAt: new Date(),
+      owner: this.userId,
+      username: Meteor.users.findOne(this.userId).username,
+      children: [],
     });
   },
   'tasks.remove'(taskId) {
