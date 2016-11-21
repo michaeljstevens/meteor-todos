@@ -13,14 +13,24 @@ class Task extends Component {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.renderTasks = this.renderTasks.bind(this);
+    this.deleteTasks = this.deleteTasks.bind(this);
   }
 
   toggleChecked() {
     Meteor.call('tasks.setChecked', this.props.task._id, !this.props.task.checked);
   }
 
-  deleteThisTask() {
-    Meteor.call('tasks.remove', this.props.task._id);
+  deleteTasks() {
+    let tasks = [];
+    let that = this;
+    this.props.tasks.forEach(task => {
+      if(task.parent && task.parent._id === that.props.task._id) {
+        tasks.push(task._id);
+      }
+    });
+
+    tasks.push(this.props.task._id);
+    Meteor.call('tasks.remove', tasks);
   }
 
   togglePrivate() {
@@ -68,7 +78,7 @@ class Task extends Component {
 
     return (
       <li className={taskClassName}>
-        <button className='delete' onClick={this.deleteThisTask.bind(this)}>
+        <button className='delete' onClick={this.deleteTasks}>
           &times;
         </button>
         <input

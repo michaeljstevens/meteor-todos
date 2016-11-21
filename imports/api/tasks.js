@@ -31,18 +31,17 @@ Meteor.methods({
       parent: parID,
     });
   },
-  'tasks.remove'(taskId) {
-    check(taskId, String);
-    const task = Tasks.findOne(taskId);
+  'tasks.remove'(tasks) {
 
-    if(task.private && task.owner !== this.userId) {
-      throw new Meteor.Error('not-authorized');
-    }
-    const descTasks = Tasks.find({parent: { $eq: {id: task._id } } });
-    descTasks.forEach(dtask => {
-      Tasks.remove(dtask._id);
+    tasks.forEach(taskId => {
+      const task = Tasks.findOne(taskId);
+
+      if(task.private && task.owner !== this.userId) {
+        throw new Meteor.Error('not-authorized');
+      }
+
+      Tasks.remove(taskId);
     });
-    Tasks.remove(taskId);
   },
   'tasks.setChecked'(taskId, setChecked) {
     check(taskId, String);
