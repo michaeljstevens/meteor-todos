@@ -21,16 +21,25 @@ class Task extends Component {
   }
 
   deleteTasks() {
-    let tasks = [];
-    let that = this;
-    this.props.tasks.forEach(task => {
-      if(task.parent && task.parent._id === that.props.task._id) {
-        tasks.push(task._id);
+    let tasks = this.findChildren(this.props.task._id);
+    tasks.push(this.props.task._id);
+    Meteor.call('tasks.remove', tasks);
+  }
+
+  findChildren(parTask) {
+    let children = this.props.tasks.filter(task => {
+      if(task.parent) {
+        return task.parent._id === parTask;
+      } else {
+        return false;
       }
     });
 
-    tasks.push(this.props.task._id);
-    Meteor.call('tasks.remove', tasks);
+    children.forEach(child => {
+      children = children.concat(this.findChildren(child._id));
+    });
+
+    return children;
   }
 
   togglePrivate() {
