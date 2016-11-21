@@ -16,7 +16,7 @@ if(Meteor.isServer) {
 }
 
 Meteor.methods({
-  'tasks.insert'(text) {
+  'tasks.insert'(text, parID = null) {
     check(text, String);
 
     if(!this.userId) {
@@ -28,29 +28,8 @@ Meteor.methods({
       createdAt: new Date(),
       owner: this.userId,
       username: Meteor.users.findOne(this.userId).username,
-      children: [],
+      parent: parID,
     });
-  },
-  'tasks.add_child'(taskId, text) {
-    check(taskId, String);
-    const task = Tasks.findOne(taskId);
-
-    if(task.private && task.owner !== this.userid) {
-      throw new Meteor.Error('not-authorized');
-    }
-
-
-    const newChild = {
-      text,
-      createdAt: new Date(),
-      owner: this.userId,
-      username: Meteor.users.findOne(this.userId).username,
-      children: [],
-    };
-
-    let newChildren = Tasks.findOne(taskId).children;
-    newChildren.push(newChild);
-    Tasks.update(taskId, { $set:{ children: newChildren } });
   },
   'tasks.remove'(taskId) {
     check(taskId, String);
@@ -59,7 +38,10 @@ Meteor.methods({
     if(task.private && task.owner !== this.userId) {
       throw new Meteor.Error('not-authorized');
     }
-
+    const descTasks = Tasks.find({parent: { $eq: {id: task._id } } });
+    descTasks.forEach(dtask => {
+      Tasks.remove(dtask._id);
+    });
     Tasks.remove(taskId);
   },
   'tasks.setChecked'(taskId, setChecked) {

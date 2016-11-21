@@ -4,6 +4,7 @@ import { Tasks } from '../api/tasks.js';
 import { Meteor } from 'meteor/meteor';
 import classnames from 'classnames';
 import { createContainer } from 'meteor/react-meteor-data';
+import Task1 from './Task.jsx';
 
 // Task component - represents a single todo item
 class Task extends Component {
@@ -30,25 +31,30 @@ class Task extends Component {
     event.preventDefault();
     const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
 
-    Meteor.call('tasks.add_child', this.props.task._id, text);
+    Meteor.call('tasks.insert', text, this.props.task);
 
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
   }
 
-  renderTasks(tasks) {
-    let filteredTasks = tasks;
-
+  renderTasks() {
+    let filteredTasks = this.props.tasks;
+    let that = this;
     return filteredTasks.map((task) => {
-      const currentUserId = this.props.currentUser && this.props.currentUser._id;
-      const showPrivateButton = task.owner === currentUserId;
+      if(task.parent && task.parent._id === that.props.task._id) {
+        const currentUserId = that.props.currentUser && that.props.currentUser._id;
+        const showPrivateButton = task.owner === currentUserId;
 
-      return(
-        <Task
-          key={task._id}
-          task={task}
-          showPrivateButton={showPrivateButton}
-          />
-      );
+        return(
+          <Task1
+            parent={that.props.task._id}
+            key={task._id}
+            task={task}
+            showPrivateButton={showPrivateButton}
+            />
+        );
+      } else {
+        return null;
+      }
     });
   }
 
@@ -90,7 +96,7 @@ class Task extends Component {
           />
         </form> : ''}
 
-        {this.renderTasks(this.props.task.children)}
+        {this.renderTasks()}
       </li>
     );
   }
