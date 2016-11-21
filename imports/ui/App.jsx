@@ -56,6 +56,14 @@ class App extends Component {
         <header>
           <h1>Todo List ({this.props.incompleteCount})</h1>
 
+          {this.props.currentUser ? <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
+            <input
+              type="text"
+              ref="textInput"
+              placeholder="Type to add new tasks"
+            />
+          </form> : ''}
+
           <label className="hide-completed">
             <input
               type='checkbox'
@@ -67,14 +75,6 @@ class App extends Component {
           </label>
 
           <AccountsUIWrapper />
-
-          {this.props.currentUser ? <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
-            <input
-              type="text"
-              ref="textInput"
-              placeholder="Type to add new tasks"
-            />
-          </form> : ''}
         </header>
 
         <ul>

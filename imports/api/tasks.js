@@ -31,7 +31,7 @@ Meteor.methods({
       children: [],
     });
   },
-  'tasks.add_child'(taskId, child) {
+  'tasks.add_child'(taskId, text) {
     check(taskId, String);
     const task = Tasks.findOne(taskId);
 
@@ -39,13 +39,18 @@ Meteor.methods({
       throw new Meteor.Error('not-authorized');
     }
 
-    Tasks.task.children.insert({
-      child,
+
+    const newChild = {
+      text,
       createdAt: new Date(),
       owner: this.userId,
       username: Meteor.users.findOne(this.userId).username,
       children: [],
-    });
+    };
+
+    let newChildren = Tasks.findOne(taskId).children;
+    newChildren.push(newChild);
+    Tasks.update(taskId, { $set:{ children: newChildren } });
   },
   'tasks.remove'(taskId) {
     check(taskId, String);
